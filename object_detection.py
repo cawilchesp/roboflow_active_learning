@@ -11,10 +11,9 @@ from imutils.video import FileVideoStream, WebcamVideoStream
 from sinks.detection_sink import DetectionSink
 from sinks.annotation_sink import AnnotationSink
 
-import config
 from tools.video_info import VideoInfo
 from tools.messages import source_message, progress_message, step_message
-from tools.write_csv import output_append, write_csv
+from tools.write_data import csv_append, txt_append, write_csv, write_txt
 
 # For debugging
 from icecream import ic
@@ -24,7 +23,6 @@ def main(
     source: str = '0',
     output: str = 'output',
     weights: str = 'yolov8m.pt',
-    class_filter: list[int] = None,
     image_size: int = 640,
     confidence: int = 0.5,
 ) -> None:
@@ -40,8 +38,7 @@ def main(
     detection_sink = DetectionSink(
         weights_path=weights,
         image_size=image_size,
-        confidence=confidence,
-        class_filter=class_filter )
+        confidence=confidence )
     step_message(next(step_count), f"{Path(weights).stem.upper()} Model Initialized ✅")
 
     # show_image size
@@ -80,11 +77,15 @@ def main(
                 break
 
             # YOLO inference
-            detections = detection_sink.detect(image=image)
-                
-            # Save object data in list
-            output_data = output_append(output_data, frame_number, detections)
+            results = detection_sink.detect(image=image)
 
+            # Save object data in list
+            # output_data = csv_append(output_data, frame_number, results)
+            output_data = txt_append(output_data, results)
+            
+            # Detections from model results
+            detections = sv.Detections.from_ultralytics(results)
+            
             # Draw annotations
             annotated_image = annotation_sink.on_detections(detections=detections, image=image)
 
@@ -107,7 +108,8 @@ def main(
     except KeyboardInterrupt:
         step_message(next(step_count), 'End of Video ✅')
     step_message(next(step_count), 'Saving Detections in CSV file ✅')
-    write_csv(f"{output}.csv", output_data)
+    # write_csv(f"{output}.csv", output_data)
+    write_txt(f"{output}.txt", output_data)
     
     step_message(next(step_count), f"Elapsed Time: {(datetime.datetime.now() - time_start).total_seconds():.2f} s")
     output_writer.release()
@@ -120,10 +122,9 @@ def main(
 if __name__ == "__main__":
     step_count = itertools.count(1)
     main(
-        source=f"{config.SOURCE_FOLDER}/{config.INPUT_VIDEO}",
-        output=f"{config.OUTPUT_FOLDER}/{config.OUTPUT_NAME}",
-        weights=f"{config.MODEL_FOLDER}/{config.MODEL_WEIGHTS}",
-        class_filter=config.CLASS_FILTER,
-        image_size=config.IMAGE_SIZE,
-        confidence=config.CONFIDENCE,
+        source="D:/Data/C3_detenido.mp4",
+        output="D:/Data/C3_detenido_output",
+        weights="D:/Data/models/yolov8/yolov8m.pt",
+        image_size=640,
+        confidence=0.25,
     )
