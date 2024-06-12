@@ -1,5 +1,5 @@
 from ultralytics import YOLO
-import supervision as sv
+from ultralytics.engine.results import Results
 
 import torch
 import numpy as np
@@ -19,8 +19,8 @@ class DetectionSink:
         self.confidence = confidence
         self.class_filter = class_filter
 
-    def detect(self, image: np.array) -> sv.Detections:
-        results = self.model(
+    def detect(self, image: np.array) -> Results:
+        ultralytics_results = self.model(
             source=image,
             imgsz=self.image_size,
             conf=self.confidence,
@@ -28,6 +28,6 @@ class DetectionSink:
             device='cuda' if torch.cuda.is_available() else 'cpu',
             verbose=False,
         )[0]
-        detections = sv.Detections.from_ultralytics(results)
         
-        return detections
+        return ultralytics_results
+    
