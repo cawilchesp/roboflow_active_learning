@@ -8,7 +8,7 @@ import itertools
 
 from imutils.video import FileVideoStream, WebcamVideoStream
 
-from sinks.detection_sink import DetectionSink
+from sinks.model_sink import ModelSink
 from sinks.annotation_sink import AnnotationSink
 
 from tools.video_info import VideoInfo
@@ -35,7 +35,7 @@ def main(
     step_message(next(step_count), f"Processor: {'GPU ✅' if torch.cuda.is_available() else 'CPU ⚠️'}")
 
     # Initialize YOLOv10 model
-    detection_sink = DetectionSink(
+    detection_sink = ModelSink(
         weights_path=weights,
         image_size=image_size,
         confidence=confidence )
@@ -80,7 +80,6 @@ def main(
             results = detection_sink.detect(image=image)
 
             # Save object data in list
-            # output_data = csv_append(output_data, frame_number, results)
             output_data = txt_append(output_data, results)
             
             # Detections from model results
@@ -107,8 +106,7 @@ def main(
 
     except KeyboardInterrupt:
         step_message(next(step_count), 'End of Video ✅')
-    step_message(next(step_count), 'Saving Detections in CSV file ✅')
-    # write_csv(f"{output}.csv", output_data)
+    step_message(next(step_count), 'Saving Detections in TXT file ✅')
     write_txt(f"{output}.txt", output_data)
     
     step_message(next(step_count), f"Elapsed Time: {(datetime.datetime.now() - time_start).total_seconds():.2f} s")
