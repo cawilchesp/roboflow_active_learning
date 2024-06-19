@@ -68,15 +68,24 @@ def txt_append(output: list, ultralytics_results: Results) -> list:
             Each result is a list containing the class id and the normalized bounding box 
             coordinates (center x, center y, width, height).
     """
+    class_conversion = {
+        0: 4,
+        1: 0,
+        2: 2,
+        3: 3,
+        5: 1,
+        7: 5
+    }
     xywhns = ultralytics_results.boxes.xywhn.cpu().numpy()
     class_ids = ultralytics_results.boxes.cls.cpu().numpy().astype(int)
 
     for class_id, xywhn in zip(class_ids, xywhns):
+        new_cls = class_conversion[class_id]
         x = xywhn[0]
         y = xywhn[1]
         w = xywhn[2]
         h = xywhn[3]
-        output.append([class_id, x, y, w, h])
+        output.append([new_cls, x, y, w, h])
 
     return output
 
