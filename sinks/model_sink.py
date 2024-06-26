@@ -20,9 +20,9 @@ class ModelSink:
         self.class_filter = class_filter
 
 
-    def detect(self, image: np.array) -> Results:
+    def detect(self, scene: np.array) -> Results:
         ultralytics_results = self.model(
-            source=image,
+            source=scene,
             imgsz=self.image_size,
             conf=self.confidence,
             classes=self.class_filter,
@@ -33,9 +33,9 @@ class ModelSink:
         return ultralytics_results
     
 
-    def track(self, image: np.array) -> Results:
+    def track(self, scene: np.array) -> Results:
         ultralytics_results = self.model.track(
-            source=image,
+            source=scene,
             persist=True,
             imgsz=self.image_size,
             conf=self.confidence,
